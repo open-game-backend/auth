@@ -2,6 +2,8 @@ package de.opengamebackend.auth.model.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import java.util.Collection;
 
 @Entity
 public class Player {
@@ -9,6 +11,9 @@ public class Player {
     private String playerId;
 
     private String nickname;
+
+    @ManyToMany
+    private Collection<Role> roles;
 
     public Player() {
     }
@@ -32,5 +37,13 @@ public class Player {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
     }
 }
