@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,7 +64,7 @@ public class AuthController {
         // Get request data.
         Player player = modelMapper.map(request, Player.class);
         player.setPlayerId(UUID.randomUUID().toString());
-        player.setRoles(Arrays.asList(userRole));
+        player.setRoles(Collections.singletonList(userRole));
 
         while (playerRepository.existsById(player.getPlayerId()))
         {
