@@ -7,9 +7,9 @@ import de.opengamebackend.auth.model.repositories.PlayerRepository;
 import de.opengamebackend.auth.model.repositories.RoleRepository;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.RegisterRequest;
-import de.opengamebackend.auth.model.responses.ErrorResponse;
 import de.opengamebackend.auth.model.responses.LoginResponse;
 import de.opengamebackend.auth.model.responses.RegisterResponse;
+import de.opengamebackend.net.ApiException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,14 +27,8 @@ import java.util.UUID;
 
 @RestController
 public class AuthController {
-    private static final ErrorResponse ERROR_INVALID_CREDENTIALS =
-            new ErrorResponse(100, "Invalid credentials.");
-    private static final ErrorResponse ERROR_INVALID_ACCESS_TOKEN =
-            new ErrorResponse(101, "Invalid access token.");
-
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_USER = "ROLE_USER";
-
 
     @Value("${de.opengamebackend.auth.adminId}")
     private String adminId;
@@ -63,7 +57,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
         Role userRole = roleRepository.findByName(ROLE_USER);
 
         // Get request data.
@@ -80,24 +74,24 @@ public class AuthController {
 
         // Send response.
         RegisterResponse response = new RegisterResponse(player.getPlayerId());
-        return new ResponseEntity(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws ApiException {
         // Look up player.
         Optional<Player> optionalPlayer = playerRepository.findById(request.getPlayerId());
 
         if (!optionalPlayer.isPresent())
         {
-            return new ResponseEntity(ERROR_INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
+            throw new ApiException(ApiErrors.ERROR_INVALID_CREDENTIALS);
         }
 
         Player player = optionalPlayer.get();
 
         // Send response.
         LoginResponse loginResponse = new LoginResponse(player.getPlayerId(), player.getRoles());
-        return new ResponseEntity(loginResponse, HttpStatus.OK);
+        return new ResponseEntity<>(loginResponse, HttpStatus.OK);
     }
 
     @Transactional
