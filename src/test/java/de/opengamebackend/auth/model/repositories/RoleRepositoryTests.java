@@ -1,4 +1,4 @@
-package de.opengamebackend.auth.repositories;
+package de.opengamebackend.auth.model.repositories;
 
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.repositories.RoleRepository;

@@ -41,6 +41,9 @@ public class AuthController {
     RoleRepository roleRepository;
 
     @Autowired
+    AuthService authService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @PostConstruct
@@ -59,22 +62,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
-        Role userRole = roleRepository.findByName(ROLE_USER);
-
-        // Get request data.
-        Player player = modelMapper.map(request, Player.class);
-        player.setPlayerId(UUID.randomUUID().toString());
-        player.setRoles(Collections.singletonList(userRole));
-
-        while (playerRepository.existsById(player.getPlayerId()))
-        {
-            player.setPlayerId(UUID.randomUUID().toString());
-        }
-
-        playerRepository.save(player);
-
-        // Send response.
-        RegisterResponse response = new RegisterResponse(player.getPlayerId());
+        RegisterResponse response = authService.register(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
