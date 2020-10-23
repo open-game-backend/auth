@@ -9,14 +9,9 @@ public class LoginResponse {
     private String playerId;
     private ArrayList<String> roles;
 
-    public LoginResponse(String playerId, Collection<Role> roles) {
+    public LoginResponse(String playerId, ArrayList<String> roles) {
         this.playerId = playerId;
-
-        this.roles = new ArrayList<>();
-
-        for (Role role : roles) {
-            this.roles.add(role.getName());
-        }
+        this.roles = roles;
     }
 
     public String getPlayerId() {

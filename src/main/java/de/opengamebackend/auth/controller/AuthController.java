@@ -68,19 +68,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws ApiException {
-        // Look up player.
-        Optional<Player> optionalPlayer = playerRepository.findById(request.getPlayerId());
-
-        if (!optionalPlayer.isPresent())
-        {
-            throw new ApiException(ApiErrors.ERROR_INVALID_CREDENTIALS);
-        }
-
-        Player player = optionalPlayer.get();
-
-        // Send response.
-        LoginResponse loginResponse = new LoginResponse(player.getPlayerId(), player.getRoles());
-        return new ResponseEntity<>(loginResponse, HttpStatus.OK);
+        LoginResponse response = authService.login(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Transactional
