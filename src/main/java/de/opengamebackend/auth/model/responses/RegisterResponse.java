@@ -3,6 +3,9 @@ package de.opengamebackend.auth.model.responses;
 public class RegisterResponse {
     private String playerId;
 
+    public RegisterResponse() {
+    }
+
     public RegisterResponse(String playerId) {
         this.playerId = playerId;
     }

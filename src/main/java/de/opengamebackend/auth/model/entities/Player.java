@@ -3,6 +3,7 @@ package de.opengamebackend.auth.model.entities;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
@@ -16,9 +17,12 @@ public class Player {
     private Collection<Role> roles;
 
     public Player() {
+        this.roles = new ArrayList<>();
     }
 
     public Player(String playerId, String nickname) {
+        this();
+
         this.playerId = playerId;
         this.nickname = nickname;
     }

@@ -9,6 +9,9 @@ public class LoginResponse {
     private String playerId;
     private ArrayList<String> roles;
 
+    public LoginResponse() {
+    }
+
     public LoginResponse(String playerId, ArrayList<String> roles) {
         this.playerId = playerId;
         this.roles = roles;
