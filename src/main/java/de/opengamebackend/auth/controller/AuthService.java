@@ -57,7 +57,7 @@ public class AuthService {
 
         if (!optionalPlayer.isPresent())
         {
-            throw new ApiException(ApiErrors.ERROR_INVALID_CREDENTIALS);
+            throw new ApiException(ApiErrors.INVALID_CREDENTIALS_CODE, ApiErrors.INVALID_CREDENTIALS_MESSAGE);
         }
 
         Player player = optionalPlayer.get();
