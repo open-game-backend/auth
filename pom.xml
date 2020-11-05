@@ -129,21 +129,16 @@
 
 	<repositories>
 		<repository>
-			<id>github-net</id>
-			<name>GitHub Packages (net)</name>
-			<url>https://maven.pkg.github.com/open-game-backend/net</url>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/open-game-backend</url>
         </repository>
-		<repository>
-			<id>github-util</id>
-			<name>GitHub Packages (util)</name>
-			<url>https://maven.pkg.github.com/open-game-backend/util</url>
-		</repository>
 	</repositories>
 
     <distributionManagement>
         <repository>
-            <id>github-auth</id>
-            <name>GitHub Packages (auth)</name>
+            <id>github</id>
+            <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/open-game-backend/auth</url>
         </repository>
     </distributionManagement>
