@@ -10,6 +10,8 @@ import de.opengamebackend.auth.model.responses.LoginResponse;
 import de.opengamebackend.auth.model.responses.RegisterResponse;
 import de.opengamebackend.net.ApiException;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import java.util.UUID;
 @Service
 public class AuthService {
     public static final String ROLE_USER = "ROLE_USER";
+
+    private Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private RoleRepository roleRepository;
     private PlayerRepository playerRepository;
@@ -48,6 +52,7 @@ public class AuthService {
         playerRepository.save(player);
 
         // Return response.
+        logger.info("Player created: {}", player.getPlayerId());
         return new RegisterResponse(player.getPlayerId());
     }
 
@@ -57,6 +62,7 @@ public class AuthService {
 
         if (!optionalPlayer.isPresent())
         {
+            logger.info("Login failed for player {}: {}", request.getPlayerId(), ApiErrors.INVALID_CREDENTIALS_MESSAGE);
             throw new ApiException(ApiErrors.INVALID_CREDENTIALS_CODE, ApiErrors.INVALID_CREDENTIALS_MESSAGE);
         }
 
@@ -69,6 +75,7 @@ public class AuthService {
             roles.add(role.getName());
         }
 
+        logger.info("Login successful for player {}.", request.getPlayerId());
         return new LoginResponse(player.getPlayerId(), roles);
     }
 }
