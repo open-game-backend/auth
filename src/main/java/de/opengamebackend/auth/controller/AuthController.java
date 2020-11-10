@@ -19,8 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AuthController {
+    private AuthService authService;
+
     @Autowired
-    AuthService authService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Registers a new player with the specified nickname.")
