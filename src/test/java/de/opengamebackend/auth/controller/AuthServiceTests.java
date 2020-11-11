@@ -9,6 +9,7 @@ import de.opengamebackend.auth.model.requests.RegisterRequest;
 import de.opengamebackend.auth.model.responses.LoginResponse;
 import de.opengamebackend.auth.model.responses.RegisterResponse;
 import de.opengamebackend.net.ApiException;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -71,7 +72,7 @@ public class AuthServiceTests {
     @Test
     public void givenInvalidPlayerId_whenLogin_thenThrowApiError() {
         // GIVEN
-        LoginRequest request = new LoginRequest();
+        LoginRequest request = mock(LoginRequest.class);
         request.setPlayerId("testId");
 
         // WHEN & THEN
@@ -86,8 +87,8 @@ public class AuthServiceTests {
         Role role = mock(Role.class);
         when(role.getName()).thenReturn(roleName);
 
-        Player player = new Player();
-        player.setRoles(Collections.singletonList(role));
+        Player player = mock(Player.class);
+        when(player.getRoles()).thenReturn(Collections.singletonList(role));
 
         when(playerRepository.findById(any())).thenReturn(Optional.of(player));
 
