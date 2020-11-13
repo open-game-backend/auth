@@ -36,6 +36,11 @@ jobs:
             "id": "github-util",
             "username": "npruehs",
             "password": "${{ secrets.PACKAGES_TOKEN }}"
+          },
+          {
+            "id": "github-test",
+            "username": "npruehs",
+            "password": "${{ secrets.PACKAGES_TOKEN }}"
           }
         ]'
 

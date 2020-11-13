@@ -80,11 +80,16 @@
 			<artifactId>net</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>de.opengamebackend</groupId>
 			<artifactId>util</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>de.opengamebackend</groupId>
+			<artifactId>test</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -137,6 +142,11 @@
 			<id>github-util</id>
 			<name>GitHub Packages (util)</name>
 			<url>https://maven.pkg.github.com/open-game-backend/util</url>
+		</repository>
+		<repository>
+			<id>github-test</id>
+			<name>GitHub Packages (test)</name>
+			<url>https://maven.pkg.github.com/open-game-backend/test</url>
 		</repository>
 	</repositories>
 
