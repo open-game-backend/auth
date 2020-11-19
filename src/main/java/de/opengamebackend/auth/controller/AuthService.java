@@ -8,6 +8,7 @@ import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.RegisterRequest;
 import de.opengamebackend.auth.model.responses.LoginResponse;
 import de.opengamebackend.auth.model.responses.RegisterResponse;
+import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;

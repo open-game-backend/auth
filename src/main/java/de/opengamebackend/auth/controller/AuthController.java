@@ -4,6 +4,7 @@ import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.RegisterRequest;
 import de.opengamebackend.auth.model.responses.LoginResponse;
 import de.opengamebackend.auth.model.responses.RegisterResponse;
+import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
