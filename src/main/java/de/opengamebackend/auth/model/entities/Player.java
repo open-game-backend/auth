@@ -11,20 +11,13 @@ public class Player {
     @Id
     private String playerId;
 
-    private String nickname;
+    private boolean locked;
 
     @ManyToMany
     private Collection<Role> roles;
 
     public Player() {
         this.roles = new ArrayList<>();
-    }
-
-    public Player(String playerId, String nickname) {
-        this();
-
-        this.playerId = playerId;
-        this.nickname = nickname;
     }
 
     public String getPlayerId() {
@@ -35,19 +28,19 @@ public class Player {
         this.playerId = playerId;
     }
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
     public Collection<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Collection<Role> roles) {
         this.roles = roles;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 }

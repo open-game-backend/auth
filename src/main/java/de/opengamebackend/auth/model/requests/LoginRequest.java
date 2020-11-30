@@ -1,20 +1,40 @@
 package de.opengamebackend.auth.model.requests;
 
 public class LoginRequest {
-    private String playerId;
+    private String provider;
+    private String key;
+    private String context;
+    private String role;
 
-    public LoginRequest() {
+    public String getProvider() {
+        return provider;
     }
 
-    public LoginRequest(String playerId) {
-        this.playerId = playerId;
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
-    public String getPlayerId() {
-        return playerId;
+    public String getKey() {
+        return key;
     }
 
-    public void setPlayerId(String playerId) {
-        this.playerId = playerId;
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

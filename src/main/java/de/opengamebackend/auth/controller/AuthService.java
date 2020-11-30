@@ -1,16 +1,14 @@
 package de.opengamebackend.auth.controller;
 
+import de.opengamebackend.auth.controller.providers.AuthProvider;
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.repositories.PlayerRepository;
 import de.opengamebackend.auth.model.repositories.RoleRepository;
 import de.opengamebackend.auth.model.requests.LoginRequest;
-import de.opengamebackend.auth.model.requests.RegisterRequest;
 import de.opengamebackend.auth.model.responses.LoginResponse;
-import de.opengamebackend.auth.model.responses.RegisterResponse;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,65 +16,94 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class AuthService {
-    public static final String ROLE_USER = "ROLE_USER";
-
     private Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private RoleRepository roleRepository;
     private PlayerRepository playerRepository;
-    private ModelMapper modelMapper;
+    private List<AuthProvider> providers;
 
     @Autowired
-    public AuthService(RoleRepository roleRepository, PlayerRepository playerRepository, ModelMapper modelMapper) {
+    public AuthService(RoleRepository roleRepository, PlayerRepository playerRepository, List<AuthProvider> providers) {
         this.roleRepository = roleRepository;
         this.playerRepository = playerRepository;
-        this.modelMapper = modelMapper;
-    }
-
-    public RegisterResponse register(RegisterRequest request) {
-        Role userRole = roleRepository.findByName(ROLE_USER);
-
-        // Get request data.
-        Player player = modelMapper.map(request, Player.class);
-        player.setPlayerId(UUID.randomUUID().toString());
-        player.setRoles(Collections.singletonList(userRole));
-
-        while (playerRepository.existsById(player.getPlayerId())) {
-            player.setPlayerId(UUID.randomUUID().toString());
-        }
-
-        playerRepository.save(player);
-
-        // Return response.
-        logger.info("Player created: {}", player.getPlayerId());
-        return new RegisterResponse(player.getPlayerId());
+        this.providers = providers;
     }
 
     public LoginResponse login(LoginRequest request) throws ApiException {
-        // Look up player.
-        Optional<Player> optionalPlayer = playerRepository.findById(request.getPlayerId());
+        // Look up provider.
+        AuthProvider provider = providers.stream().filter(p -> p.getId().equals(request.getProvider())).findAny().orElse(null);
 
-        if (!optionalPlayer.isPresent())
-        {
-            logger.info("Login failed for player {}: {}", request.getPlayerId(), ApiErrors.INVALID_CREDENTIALS_MESSAGE);
+        if (provider == null) {
+            logger.info("Login failed - unknown auth provider: {}", request.getProvider());
+            throw new ApiException(ApiErrors.UNKNOWN_AUTH_PROVIDER_CODE, ApiErrors.UNKNOWN_AUTH_PROVIDER_MESSAGE);
+        }
+
+        // Authenticate player.
+        String playerId = provider.authenticate(request.getKey(), request.getContext());
+
+        if (playerId == null) {
+            logger.info("Login failed - failed to authenticate with provider {}.", request.getProvider());
             throw new ApiException(ApiErrors.INVALID_CREDENTIALS_CODE, ApiErrors.INVALID_CREDENTIALS_MESSAGE);
         }
 
-        Player player = optionalPlayer.get();
+        // Look up role.
+        Role role = roleRepository.findByName(request.getRole());
+
+        if (role == null) {
+            logger.info("Login failed - unknown role: {}", request.getRole());
+            throw new ApiException(ApiErrors.INVALID_ROLE_CODE, ApiErrors.INVALID_ROLE_MESSAGE);
+        }
+
+        // Look up player.
+        boolean firstTimeSetup = false;
+
+        Player player = playerRepository.findById(playerId).orElse(null);
+
+        if (player == null) {
+            player = new Player();
+            player.setRoles(Collections.singletonList(role));
+            player.setPlayerId(UUID.randomUUID().toString());
+
+            while (playerRepository.existsById(player.getPlayerId())) {
+                player.setPlayerId(UUID.randomUUID().toString());
+            }
+
+            // Check if we're running the application for the very first time and need a first admin user.
+            if (Role.ADMIN.equals(request.getRole())) {
+                List<Player> admins = playerRepository.findByRoles(role);
+
+                if (admins == null || admins.isEmpty()) {
+                    // Create admin user and allow login.
+                    logger.info("First time setup - admin created: {}", player.getPlayerId());
+
+                    firstTimeSetup = true;
+                } else {
+                    // Lock new admin until unlocked by others.
+                    player.setLocked(true);
+                }
+            }
+
+            playerRepository.save(player);
+        }
 
         // Send response.
         ArrayList<String> roles = new ArrayList<>();
 
-        for (Role role : player.getRoles()) {
-            roles.add(role.getName());
+        for (Role r : player.getRoles()) {
+            roles.add(r.getName());
         }
 
-        logger.info("Login successful for player {}.", request.getPlayerId());
-        return new LoginResponse(player.getPlayerId(), roles);
+        logger.info("Login successful for player {} as {} with provider {}{}.", playerId, request.getRole(),
+                request.getProvider(), player.isLocked() ? " (locked)" : "");
+
+        LoginResponse response = new LoginResponse(player.getPlayerId(), roles);
+        response.setLocked(player.isLocked());
+        response.setFirstTimeSetup(firstTimeSetup);
+        return response;
     }
 }

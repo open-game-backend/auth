@@ -5,10 +5,10 @@ import java.util.Collection;
 
 @Entity
 public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    public static final String USER = "ROLE_USER";
+    public static final String ADMIN = "ROLE_ADMIN";
 
+    @Id
     private String name;
 
     @ManyToMany(mappedBy = "roles")
@@ -19,10 +19,6 @@ public class Role {
 
     public Role(String name) {
         this.name = name;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {

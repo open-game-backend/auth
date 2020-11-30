@@ -1,7 +1,6 @@
 package de.opengamebackend.auth.model.repositories;
 
 import de.opengamebackend.auth.model.entities.Role;
-import de.opengamebackend.auth.model.repositories.RoleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -11,11 +10,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 public class RoleRepositoryTests {
-    @Autowired
     private TestEntityManager entityManager;
+    private RoleRepository roleRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
+    public RoleRepositoryTests(TestEntityManager entityManager, RoleRepository roleRepository) {
+        this.entityManager = entityManager;
+        this.roleRepository = roleRepository;
+    }
 
     @Test
     public void givenRole_whenFindByName_thenReturnRole() {

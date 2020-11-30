@@ -1,13 +1,18 @@
 package de.opengamebackend.auth.model.responses;
 
-import de.opengamebackend.auth.model.entities.Role;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class LoginResponse {
     private String playerId;
     private ArrayList<String> roles;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean locked;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean firstTimeSetup;
 
     public LoginResponse() {
     }
@@ -31,5 +36,21 @@ public class LoginResponse {
 
     public void setRoles(ArrayList<String> roles) {
         this.roles = roles;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public boolean isFirstTimeSetup() {
+        return firstTimeSetup;
+    }
+
+    public void setFirstTimeSetup(boolean firstTimeSetup) {
+        this.firstTimeSetup = firstTimeSetup;
     }
 }

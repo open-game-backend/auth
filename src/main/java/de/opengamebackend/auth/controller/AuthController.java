@@ -1,9 +1,7 @@
 package de.opengamebackend.auth.controller;
 
 import de.opengamebackend.auth.model.requests.LoginRequest;
-import de.opengamebackend.auth.model.requests.RegisterRequest;
 import de.opengamebackend.auth.model.responses.LoginResponse;
-import de.opengamebackend.auth.model.responses.RegisterResponse;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,14 +25,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register")
-    @Operation(summary = "Registers a new player with the specified nickname.")
-    @ApiResponse(responseCode = "200", description = "Player registered.")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
-        RegisterResponse response = authService.register(request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @PostMapping("/login")
     @Operation(summary = "Verifies and logs in the specified player.")
     @ApiResponses(value = {
@@ -46,7 +36,10 @@ public class AuthController {
                             schema = @Schema(implementation = LoginResponse.class)) }),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Error " + ApiErrors.INVALID_CREDENTIALS_CODE + ": " + ApiErrors.INVALID_CREDENTIALS_MESSAGE,
+                    description =
+                            "Error " + ApiErrors.INVALID_CREDENTIALS_CODE + ": " + ApiErrors.INVALID_CREDENTIALS_MESSAGE + "<br />" +
+                            "Error " + ApiErrors.UNKNOWN_AUTH_PROVIDER_CODE + ": " + ApiErrors.UNKNOWN_AUTH_PROVIDER_MESSAGE + "<br />" +
+                            "Error " + ApiErrors.INVALID_ROLE_CODE + ": " + ApiErrors.INVALID_ROLE_MESSAGE,
                     content = { @Content })
     })
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws ApiException {
