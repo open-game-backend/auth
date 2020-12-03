@@ -78,7 +78,7 @@
 		<dependency>
 			<groupId>de.opengamebackend</groupId>
 			<artifactId>net</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.opengamebackend</groupId>
@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>de.opengamebackend</groupId>
 			<artifactId>test</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
