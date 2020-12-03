@@ -37,25 +37,30 @@ public class GithubAuthProvider implements AuthProvider {
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("code", key)
                 .queryParam("state", context);
+        String uri = builder.toUriString();
 
         HttpHeaders headers = getDefaultHttpHeaders();
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
-        GithubGetAccessTokenResponse getAccessTokenResponse = restTemplate.postForObject
-                (builder.toUriString(), httpEntity, GithubGetAccessTokenResponse.class);
+        ResponseEntity<GithubGetAccessTokenResponse> getAccessTokenResponse = restTemplate.exchange
+                (uri, HttpMethod.POST, httpEntity, GithubGetAccessTokenResponse.class);
 
-        if (getAccessTokenResponse == null) {
+        if (getAccessTokenResponse.getStatusCodeValue() >= 400 ||
+                getAccessTokenResponse.getBody() == null ||
+                getAccessTokenResponse.getBody().getAccessToken() == null) {
             return null;
         }
 
         // Get user details.
-        headers.set("Authorization", "token " + getAccessTokenResponse.getAccessToken());
+        headers.set("Authorization", "token " + getAccessTokenResponse.getBody().getAccessToken());
         httpEntity = new HttpEntity<>(headers);
 
         ResponseEntity<GithubGetUserResponse> getUserResponse = restTemplate.exchange("https://api.github.com/user",
                 HttpMethod.GET, httpEntity, GithubGetUserResponse.class);
 
-        if (getUserResponse.getStatusCodeValue() >= 400 || getUserResponse.getBody() == null) {
+        if (getUserResponse.getStatusCodeValue() >= 400 ||
+                getUserResponse.getBody() == null ||
+                getUserResponse.getBody().getLogin() == null) {
             return null;
         }
 
