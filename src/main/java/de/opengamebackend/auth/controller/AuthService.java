@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -44,9 +43,9 @@ public class AuthService {
         }
 
         // Authenticate player.
-        String playerId = provider.authenticate(request.getKey(), request.getContext());
+        String userId = provider.authenticate(request.getKey(), request.getContext());
 
-        if (playerId == null) {
+        if (userId == null) {
             logger.info("Login failed - failed to authenticate with provider {}.", request.getProvider());
             throw new ApiException(ApiErrors.INVALID_CREDENTIALS_CODE, ApiErrors.INVALID_CREDENTIALS_MESSAGE);
         }
@@ -62,16 +61,13 @@ public class AuthService {
         // Look up player.
         boolean firstTimeSetup = false;
 
-        Player player = playerRepository.findById(playerId).orElse(null);
+        Player player = playerRepository.findByUserIdAndProvider(userId, request.getProvider()).orElse(null);
 
         if (player == null) {
             player = new Player();
             player.setRoles(Collections.singletonList(role));
-            player.setPlayerId(UUID.randomUUID().toString());
-
-            while (playerRepository.existsById(player.getPlayerId())) {
-                player.setPlayerId(UUID.randomUUID().toString());
-            }
+            player.setUserId(userId);
+            player.setProvider(request.getProvider());
 
             // Check if we're running the application for the very first time and need a first admin user.
             if (Role.ADMIN.equals(request.getRole())) {
@@ -79,7 +75,7 @@ public class AuthService {
 
                 if (admins == null || admins.isEmpty()) {
                     // Create admin user and allow login.
-                    logger.info("First time setup - admin created: {}", player.getPlayerId());
+                    logger.info("First time setup - admin created: {}", player.getUserId());
 
                     firstTimeSetup = true;
                 } else {
@@ -98,10 +94,10 @@ public class AuthService {
             roles.add(r.getName());
         }
 
-        logger.info("Login successful for player {} as {} with provider {}{}.", playerId, request.getRole(),
+        logger.info("Login successful for player {} as {} with provider {}{}.", player.getUserId(), request.getRole(),
                 request.getProvider(), player.isLocked() ? " (locked)" : "");
 
-        LoginResponse response = new LoginResponse(player.getPlayerId(), roles);
+        LoginResponse response = new LoginResponse(player.getUserId(), roles);
         response.setLocked(player.isLocked());
         response.setFirstTimeSetup(firstTimeSetup);
         return response;

@@ -2,14 +2,19 @@ package de.opengamebackend.auth.model.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.ManyToMany;
 import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
+@IdClass(PlayerId.class)
 public class Player {
     @Id
-    private String playerId;
+    private String userId;
+
+    @Id
+    private String provider;
 
     private boolean locked;
 
@@ -20,12 +25,20 @@ public class Player {
         this.roles = new ArrayList<>();
     }
 
-    public String getPlayerId() {
-        return playerId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setPlayerId(String playerId) {
-        this.playerId = playerId;
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
     public Collection<Role> getRoles() {

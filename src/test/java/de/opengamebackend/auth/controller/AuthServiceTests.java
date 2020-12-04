@@ -13,6 +13,8 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -94,6 +96,31 @@ public class AuthServiceTests {
         assertThat(response.getPlayerId()).isNotNull();
         assertThat(response.getPlayerId()).isNotEmpty();
         assertThat(response.getRoles()).containsExactly(roleName);
+    }
+
+    @Test
+    public void givenExistingPlayer_whenLogin_thenReturnPlayer() throws ApiException {
+        // GIVEN
+        String playerId = "testPlayerId";
+        String roleName = "testRole";
+
+        Role role = mock(Role.class);
+        when(roleRepository.findByName(roleName)).thenReturn(role);
+
+        LoginRequest request = mock(LoginRequest.class);
+        when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(request.getRole()).thenReturn(roleName);
+        when(authProvider.authenticate(any(), any())).thenReturn(playerId);
+
+        Player player = mock(Player.class);
+        when(player.getUserId()).thenReturn(playerId);
+        when(playerRepository.findByUserIdAndProvider(playerId, TEST_PROVIDER_ID)).thenReturn(Optional.of(player));
+
+        // WHEN
+        LoginResponse response = authService.login(request);
+
+        // THEN
+        assertThat(response.getPlayerId()).isEqualTo(playerId);
     }
 
     @Test
