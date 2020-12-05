@@ -5,8 +5,10 @@ import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.repositories.PlayerRepository;
 import de.opengamebackend.auth.model.repositories.RoleRepository;
+import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
-import de.opengamebackend.auth.model.responses.LoginResponse;
+import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
+import de.opengamebackend.auth.model.responses.*;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import org.slf4j.Logger;
@@ -33,12 +35,27 @@ public class AuthService {
         this.providers = providers;
     }
 
+    public GetAdminsResponse getAdmins() {
+        GetAdminsResponse response = new GetAdminsResponse();
+
+        Role adminRole = roleRepository.findByName(Role.ADMIN);
+        List<Player> admins = playerRepository.findByRoles(adminRole);
+
+        for (Player admin : admins) {
+            GetAdminsResponseAdmin responseAdmin =
+                    new GetAdminsResponseAdmin(admin.getUserId(), admin.getProvider(), admin.isLocked());
+            response.getAdmins().add(responseAdmin);
+        }
+
+        return response;
+    }
+
     public LoginResponse login(LoginRequest request) throws ApiException {
         // Look up provider.
         AuthProvider provider = providers.stream().filter(p -> p.getId().equals(request.getProvider())).findAny().orElse(null);
 
         if (provider == null) {
-            logger.info("Login failed - unknown auth provider: {}", request.getProvider());
+            logger.error("Login failed - unknown auth provider: {}", request.getProvider());
             throw new ApiException(ApiErrors.UNKNOWN_AUTH_PROVIDER_CODE, ApiErrors.UNKNOWN_AUTH_PROVIDER_MESSAGE);
         }
 
@@ -46,7 +63,7 @@ public class AuthService {
         String userId = provider.authenticate(request.getKey(), request.getContext());
 
         if (userId == null) {
-            logger.info("Login failed - failed to authenticate with provider {}.", request.getProvider());
+            logger.error("Login failed - failed to authenticate with provider {}.", request.getProvider());
             throw new ApiException(ApiErrors.INVALID_CREDENTIALS_CODE, ApiErrors.INVALID_CREDENTIALS_MESSAGE);
         }
 
@@ -54,7 +71,7 @@ public class AuthService {
         Role role = roleRepository.findByName(request.getRole());
 
         if (role == null) {
-            logger.info("Login failed - unknown role: {}", request.getRole());
+            logger.error("Login failed - unknown role: {}", request.getRole());
             throw new ApiException(ApiErrors.INVALID_ROLE_CODE, ApiErrors.INVALID_ROLE_MESSAGE);
         }
 
@@ -98,8 +115,33 @@ public class AuthService {
                 request.getProvider(), player.isLocked() ? " (locked)" : "");
 
         LoginResponse response = new LoginResponse(player.getUserId(), roles);
+        response.setProvider(request.getProvider());
         response.setLocked(player.isLocked());
         response.setFirstTimeSetup(firstTimeSetup);
         return response;
+    }
+
+    public LockPlayerResponse lockPlayer(LockPlayerRequest request) throws ApiException {
+        setPlayerLocked(request.getUserId(), request.getProvider(), true);
+        return new LockPlayerResponse(request.getUserId(), request.getProvider(), true);
+    }
+
+    public UnlockPlayerResponse unlockPlayer(UnlockPlayerRequest request) throws ApiException {
+        setPlayerLocked(request.getUserId(), request.getProvider(), false);
+        return new UnlockPlayerResponse(request.getUserId(), request.getProvider(), false);
+    }
+
+    private void setPlayerLocked(String userId, String provider, boolean locked) throws ApiException {
+        Player player = playerRepository.findByUserIdAndProvider(userId, provider).orElse(null);
+
+        if (player == null) {
+            logger.error("Failed to change player lock - player not found: {} ({})", userId, provider);
+            throw new ApiException(ApiErrors.PLAYER_NOT_FOUND_CODE, ApiErrors.PLAYER_NOT_FOUND_MESSAGE);
+        }
+
+        player.setLocked(locked);
+        playerRepository.save(player);
+
+        logger.info("Player lock changed - {} ({}) - locked: {}", userId, provider, locked);
     }
 }

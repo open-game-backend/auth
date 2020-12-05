@@ -5,8 +5,13 @@ import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.repositories.PlayerRepository;
 import de.opengamebackend.auth.model.repositories.RoleRepository;
+import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
+import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
+import de.opengamebackend.auth.model.responses.GetAdminsResponse;
+import de.opengamebackend.auth.model.responses.LockPlayerResponse;
 import de.opengamebackend.auth.model.responses.LoginResponse;
+import de.opengamebackend.auth.model.responses.UnlockPlayerResponse;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import org.assertj.core.util.Lists;
@@ -37,6 +42,42 @@ public class AuthServiceTests {
         when(authProvider.getId()).thenReturn(TEST_PROVIDER_ID);
 
         authService = new AuthService(roleRepository, playerRepository, Lists.list(authProvider));
+    }
+
+    @Test
+    public void givenAdmins_whenGetAdmins_thenReturnAdmins() throws ApiException {
+        // GIVEN
+        Role role = mock(Role.class);
+        when(roleRepository.findByName(Role.ADMIN)).thenReturn(role);
+
+        String admin1Id = "admin1";
+        String admin2Id = "admin2";
+
+        Player admin1 = mock(Player.class);
+        when(admin1.getUserId()).thenReturn(admin1Id);
+        when(admin1.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(admin1.isLocked()).thenReturn(false);
+
+        Player admin2 = mock(Player.class);
+        when(admin2.getUserId()).thenReturn(admin2Id);
+        when(admin2.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(admin2.isLocked()).thenReturn(true);
+
+        when(playerRepository.findByRoles(role)).thenReturn(Lists.list(admin1, admin2));
+
+        // WHEN
+        GetAdminsResponse response = authService.getAdmins();
+
+        // THEN
+        assertThat(response).isNotNull();
+        assertThat(response.getAdmins()).isNotNull();
+        assertThat(response.getAdmins()).hasSize(2);
+        assertThat(response.getAdmins().get(0).getUserId()).isEqualTo(admin1Id);
+        assertThat(response.getAdmins().get(0).getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getAdmins().get(0).isLocked()).isEqualTo(false);
+        assertThat(response.getAdmins().get(1).getUserId()).isEqualTo(admin2Id);
+        assertThat(response.getAdmins().get(1).getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getAdmins().get(1).isLocked()).isEqualTo(true);
     }
 
     @Test
@@ -121,6 +162,7 @@ public class AuthServiceTests {
 
         // THEN
         assertThat(response.getPlayerId()).isEqualTo(playerId);
+        assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
     }
 
     @Test
@@ -162,5 +204,75 @@ public class AuthServiceTests {
 
         // THEN
         assertThat(response.isLocked()).isTrue();
+    }
+
+    @Test
+    public void givenInvalidPlayer_whenLockPlayer_thenThrowException() {
+        // GIVEN
+        LockPlayerRequest request = mock(LockPlayerRequest.class);
+
+        // WHEN & THEN
+        assertThatExceptionOfType(ApiException.class)
+                .isThrownBy(() -> authService.lockPlayer(request))
+                .withMessage(ApiErrors.PLAYER_NOT_FOUND_MESSAGE);
+    }
+
+    @Test
+    public void givenValidPlayer_whenLockPlayer_thenPlayerLocked() throws ApiException {
+        // GIVEN
+        String userId = "testPlayer";
+
+        Player player = mock(Player.class);
+        when(playerRepository.findByUserIdAndProvider(userId, TEST_PROVIDER_ID)).thenReturn(Optional.ofNullable(player));
+
+        LockPlayerRequest request = mock(LockPlayerRequest.class);
+        when(request.getUserId()).thenReturn(userId);
+        when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
+
+        // WHEN
+        LockPlayerResponse response = authService.lockPlayer(request);
+
+        // THEN
+        verify(player).setLocked(true);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getUserId()).isEqualTo(userId);
+        assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.isLocked()).isTrue();
+    }
+
+    @Test
+    public void givenInvalidPlayer_whenUnlockPlayer_thenThrowException() {
+        // GIVEN
+        UnlockPlayerRequest request = mock(UnlockPlayerRequest.class);
+
+        // WHEN & THEN
+        assertThatExceptionOfType(ApiException.class)
+                .isThrownBy(() -> authService.unlockPlayer(request))
+                .withMessage(ApiErrors.PLAYER_NOT_FOUND_MESSAGE);
+    }
+
+    @Test
+    public void givenValidPlayer_whenUnlockPlayer_thenPlayerUnlocked() throws ApiException {
+        // GIVEN
+        String userId = "testPlayer";
+
+        Player player = mock(Player.class);
+        when(playerRepository.findByUserIdAndProvider(userId, TEST_PROVIDER_ID)).thenReturn(Optional.ofNullable(player));
+
+        UnlockPlayerRequest request = mock(UnlockPlayerRequest.class);
+        when(request.getUserId()).thenReturn(userId);
+        when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
+
+        // WHEN
+        UnlockPlayerResponse response = authService.unlockPlayer(request);
+
+        // THEN
+        verify(player).setLocked(false);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getUserId()).isEqualTo(userId);
+        assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.isLocked()).isFalse();
     }
 }

@@ -1,7 +1,12 @@
 package de.opengamebackend.auth.controller;
 
+import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
+import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
+import de.opengamebackend.auth.model.responses.GetAdminsResponse;
+import de.opengamebackend.auth.model.responses.LockPlayerResponse;
 import de.opengamebackend.auth.model.responses.LoginResponse;
+import de.opengamebackend.auth.model.responses.UnlockPlayerResponse;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +29,59 @@ public class AuthController {
     @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @GetMapping("/admins")
+    @Operation(summary = "Gets all admins registered for this application, including locked ones.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "All admins registered for this application, including locked ones.",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetAdminsResponse.class)) })
+    })
+    public ResponseEntity<GetAdminsResponse> getAdmins() throws ApiException {
+        GetAdminsResponse response = authService.getAdmins();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/lockPlayer")
+    @Operation(summary = "Locks the specified player, preventing them from logging in.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Player locked.",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LockPlayerResponse.class)) }),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Error " + ApiErrors.PLAYER_NOT_FOUND_CODE + ": " + ApiErrors.PLAYER_NOT_FOUND_MESSAGE,
+                    content = { @Content })
+    })
+    public ResponseEntity<LockPlayerResponse> lockPlayer(@RequestBody LockPlayerRequest request) throws ApiException {
+        LockPlayerResponse response = authService.lockPlayer(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/unlockPlayer")
+    @Operation(summary = "Unlocks the specified player, allowing them to log in.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Player unlocked.",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UnlockPlayerResponse.class)) }),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Error " + ApiErrors.PLAYER_NOT_FOUND_CODE + ": " + ApiErrors.PLAYER_NOT_FOUND_MESSAGE,
+                    content = { @Content })
+    })
+    public ResponseEntity<UnlockPlayerResponse> unlockPlayer(@RequestBody UnlockPlayerRequest request) throws ApiException {
+        UnlockPlayerResponse response = authService.unlockPlayer(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/login")
