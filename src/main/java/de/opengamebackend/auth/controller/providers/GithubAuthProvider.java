@@ -1,6 +1,6 @@
 package de.opengamebackend.auth.controller.providers;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -11,15 +11,12 @@ import java.util.List;
 
 @Component
 public class GithubAuthProvider implements AuthProvider {
+    private GithubAuthProviderConfig config;
 
-    @Value("${de.opengamebackend.auth.provider.github.clientId}")
-    private String clientId;
-
-    @Value("${de.opengamebackend.auth.provider.github.clientSecret}")
-    private String clientSecret;
-
-    @Value("${de.opengamebackend.auth.provider.github.redirectUri}")
-    private String redirectUri;
+    @Autowired
+    public GithubAuthProvider(GithubAuthProviderConfig config) {
+        this.config = config;
+    }
 
     @Override
     public String getId() {
@@ -32,9 +29,9 @@ public class GithubAuthProvider implements AuthProvider {
 
         // Get OAuth2 token.
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://github.com/login/oauth/access_token")
-                .queryParam("client_id", clientId)
-                .queryParam("client_secret", clientSecret)
-                .queryParam("redirect_uri", redirectUri)
+                .queryParam("client_id", config.getClientId())
+                .queryParam("client_secret", config.getClientSecret())
+                .queryParam("redirect_uri", config.getRedirectUri())
                 .queryParam("code", key)
                 .queryParam("state", context);
         String uri = builder.toUriString();

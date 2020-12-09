@@ -10,12 +10,14 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 
 import java.io.FileReader;
 import java.io.IOException;
 
 @SpringBootApplication
+@ConfigurationPropertiesScan
 @EnableOpenGameBackendUtils
 public class AuthApplication {
 	@Bean
