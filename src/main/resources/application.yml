@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: open-game-backend-auth
+
+server:
+  port: 9001
+
+de:
+  opengamebackend:
+    application:
+      version: @project.version@
