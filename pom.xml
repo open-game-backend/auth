@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>de.opengamebackend</groupId>
 	<artifactId>auth</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.6-SNAPSHOT</version>
 	<name>auth</name>
 	<description>Provides authentication and authorization for all players of the Open Game Backend.</description>
 
@@ -61,12 +61,6 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.4.8</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-model</artifactId>
-			<version>3.6.3</version>
 		</dependency>
 
 		<dependency>
