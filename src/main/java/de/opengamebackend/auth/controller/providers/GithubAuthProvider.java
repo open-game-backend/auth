@@ -1,5 +1,6 @@
 package de.opengamebackend.auth.controller.providers;
 
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,18 @@ public class GithubAuthProvider implements AuthProvider {
 
     @Override
     public String authenticate(String key, String context) {
+        if (Strings.isNullOrEmpty(config.getClientId())) {
+            throw new IllegalStateException("GitHub client ID not set.");
+        }
+
+        if (Strings.isNullOrEmpty(config.getClientSecret())) {
+            throw new IllegalStateException("GitHub client secret not set.");
+        }
+
+        if (Strings.isNullOrEmpty(config.getRedirectUri())) {
+            throw new IllegalStateException("GitHub redirect URI not set.");
+        }
+
         RestTemplate restTemplate = new RestTemplate();
 
         // Get OAuth2 token.

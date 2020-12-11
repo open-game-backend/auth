@@ -4,19 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotNull;
-
 @ConstructorBinding
 @ConfigurationProperties("de.opengamebackend.auth.provider.github")
 @Validated
 public class GithubAuthProviderConfig {
-    @NotNull
     private String clientId;
-
-    @NotNull
     private String clientSecret;
-
-    @NotNull
     private String redirectUri;
 
     public GithubAuthProviderConfig(String clientId, String clientSecret, String redirectUri) {
