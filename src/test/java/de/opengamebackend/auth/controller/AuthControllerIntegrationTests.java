@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.transaction.Transactional;
+import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -55,13 +56,14 @@ public class AuthControllerIntegrationTests {
     @Test
     public void givenPlayer_whenLockPlayer_thenOk() throws Exception {
         Player player = new Player();
-        player.setUserId("testUserId");
+        player.setId(UUID.randomUUID().toString());
         player.setProvider("testProvider");
+        player.setProviderUserId("testProviderUserId");
         entityManager.persistAndFlush(player);
 
         LockPlayerRequest request = new LockPlayerRequest();
-        request.setUserId(player.getUserId());
         request.setProvider(player.getProvider());
+        request.setProviderUserId(player.getProviderUserId());
 
         httpRequestUtils.assertPostOk(mvc, "/lockPlayer", request, LockPlayerResponse.class);
     }
@@ -69,13 +71,14 @@ public class AuthControllerIntegrationTests {
     @Test
     public void givenPlayer_whenUnlockPlayer_thenOk() throws Exception {
         Player player = new Player();
-        player.setUserId("testUserId");
+        player.setId(UUID.randomUUID().toString());
         player.setProvider("testProvider");
+        player.setProviderUserId("testProviderUserId");
         entityManager.persistAndFlush(player);
 
         UnlockPlayerRequest request = new UnlockPlayerRequest();
-        request.setUserId(player.getUserId());
         request.setProvider(player.getProvider());
+        request.setProviderUserId(player.getProviderUserId());
 
         httpRequestUtils.assertPostOk(mvc, "/unlockPlayer", request, UnlockPlayerResponse.class);
     }

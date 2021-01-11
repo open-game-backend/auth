@@ -33,8 +33,9 @@ public class PlayerRepositoryTests {
         entityManager.persist(role);
 
         Player player = new Player();
-        player.setUserId("testPlayer");
+        player.setId("testId");
         player.setProvider("testProvider");
+        player.setProviderUserId("testProviderUserId");
         player.setRoles(Lists.list(role));
         entityManager.persist(player);
 
@@ -53,14 +54,15 @@ public class PlayerRepositoryTests {
     public void givenPlayer_whenFindByUserIdAndProvider_thenReturnPlayer() {
         // GIVEN
         Player player = new Player();
-        player.setUserId("testPlayer");
+        player.setId("testId");
         player.setProvider("testProvider");
+        player.setProviderUserId("testProviderUserId");
         entityManager.persist(player);
 
         entityManager.flush();
 
         // WHEN
-        Optional<Player> found = playerRepository.findByUserIdAndProvider(player.getUserId(), player.getProvider());
+        Optional<Player> found = playerRepository.findByProviderAndProviderUserId(player.getProvider(), player.getProviderUserId());
 
         // THEN
         assertThat(found).isPresent();

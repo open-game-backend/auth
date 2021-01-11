@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface PlayerRepository extends CrudRepository<Player, String> {
     List<Player> findByRoles(Role role);
-    Optional<Player> findByUserIdAndProvider(String userId, String provider);
+    Optional<Player> findByProviderAndProviderUserId(String provider, String providerUserId);
 }

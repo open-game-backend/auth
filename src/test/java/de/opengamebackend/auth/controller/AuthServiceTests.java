@@ -45,7 +45,7 @@ public class AuthServiceTests {
     }
 
     @Test
-    public void givenAdmins_whenGetAdmins_thenReturnAdmins() throws ApiException {
+    public void givenAdmins_whenGetAdmins_thenReturnAdmins() {
         // GIVEN
         Role role = mock(Role.class);
         when(roleRepository.findByName(Role.ADMIN)).thenReturn(role);
@@ -54,13 +54,13 @@ public class AuthServiceTests {
         String admin2Id = "admin2";
 
         Player admin1 = mock(Player.class);
-        when(admin1.getUserId()).thenReturn(admin1Id);
         when(admin1.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(admin1.getProviderUserId()).thenReturn(admin1Id);
         when(admin1.isLocked()).thenReturn(false);
 
         Player admin2 = mock(Player.class);
-        when(admin2.getUserId()).thenReturn(admin2Id);
         when(admin2.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(admin2.getProviderUserId()).thenReturn(admin2Id);
         when(admin2.isLocked()).thenReturn(true);
 
         when(playerRepository.findByRoles(role)).thenReturn(Lists.list(admin1, admin2));
@@ -72,11 +72,12 @@ public class AuthServiceTests {
         assertThat(response).isNotNull();
         assertThat(response.getAdmins()).isNotNull();
         assertThat(response.getAdmins()).hasSize(2);
-        assertThat(response.getAdmins().get(0).getUserId()).isEqualTo(admin1Id);
         assertThat(response.getAdmins().get(0).getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getAdmins().get(0).getProviderUserId()).isEqualTo(admin1Id);
+
         assertThat(response.getAdmins().get(0).isLocked()).isEqualTo(false);
-        assertThat(response.getAdmins().get(1).getUserId()).isEqualTo(admin2Id);
         assertThat(response.getAdmins().get(1).getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getAdmins().get(1).getProviderUserId()).isEqualTo(admin2Id);
         assertThat(response.getAdmins().get(1).isLocked()).isEqualTo(true);
     }
 
@@ -143,6 +144,7 @@ public class AuthServiceTests {
     public void givenExistingPlayer_whenLogin_thenReturnPlayer() throws ApiException {
         // GIVEN
         String playerId = "testPlayerId";
+        String providerUserId = "testProviderUserId";
         String roleName = "testRole";
 
         Role role = mock(Role.class);
@@ -151,11 +153,11 @@ public class AuthServiceTests {
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
         when(request.getRole()).thenReturn(roleName);
-        when(authProvider.authenticate(any(), any())).thenReturn(playerId);
+        when(authProvider.authenticate(any(), any())).thenReturn(providerUserId);
 
         Player player = mock(Player.class);
-        when(player.getUserId()).thenReturn(playerId);
-        when(playerRepository.findByUserIdAndProvider(playerId, TEST_PROVIDER_ID)).thenReturn(Optional.of(player));
+        when(player.getId()).thenReturn(playerId);
+        when(playerRepository.findByProviderAndProviderUserId(TEST_PROVIDER_ID, providerUserId)).thenReturn(Optional.of(player));
 
         // WHEN
         LoginResponse response = authService.login(request);
@@ -163,6 +165,7 @@ public class AuthServiceTests {
         // THEN
         assertThat(response.getPlayerId()).isEqualTo(playerId);
         assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getProviderUserId()).isEqualTo(providerUserId);
     }
 
     @Test
@@ -220,14 +223,14 @@ public class AuthServiceTests {
     @Test
     public void givenValidPlayer_whenLockPlayer_thenPlayerLocked() throws ApiException {
         // GIVEN
-        String userId = "testPlayer";
+        String providerUserId = "testPlayer";
 
         Player player = mock(Player.class);
-        when(playerRepository.findByUserIdAndProvider(userId, TEST_PROVIDER_ID)).thenReturn(Optional.ofNullable(player));
+        when(playerRepository.findByProviderAndProviderUserId(TEST_PROVIDER_ID, providerUserId)).thenReturn(Optional.ofNullable(player));
 
         LockPlayerRequest request = mock(LockPlayerRequest.class);
-        when(request.getUserId()).thenReturn(userId);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(request.getProviderUserId()).thenReturn(providerUserId);
 
         // WHEN
         LockPlayerResponse response = authService.lockPlayer(request);
@@ -236,8 +239,8 @@ public class AuthServiceTests {
         verify(player).setLocked(true);
 
         assertThat(response).isNotNull();
-        assertThat(response.getUserId()).isEqualTo(userId);
         assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getProviderUserId()).isEqualTo(providerUserId);
         assertThat(response.isLocked()).isTrue();
     }
 
@@ -255,14 +258,14 @@ public class AuthServiceTests {
     @Test
     public void givenValidPlayer_whenUnlockPlayer_thenPlayerUnlocked() throws ApiException {
         // GIVEN
-        String userId = "testPlayer";
+        String providerUserId = "testPlayer";
 
         Player player = mock(Player.class);
-        when(playerRepository.findByUserIdAndProvider(userId, TEST_PROVIDER_ID)).thenReturn(Optional.ofNullable(player));
+        when(playerRepository.findByProviderAndProviderUserId(TEST_PROVIDER_ID, providerUserId)).thenReturn(Optional.ofNullable(player));
 
         UnlockPlayerRequest request = mock(UnlockPlayerRequest.class);
-        when(request.getUserId()).thenReturn(userId);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(request.getProviderUserId()).thenReturn(providerUserId);
 
         // WHEN
         UnlockPlayerResponse response = authService.unlockPlayer(request);
@@ -271,8 +274,8 @@ public class AuthServiceTests {
         verify(player).setLocked(false);
 
         assertThat(response).isNotNull();
-        assertThat(response.getUserId()).isEqualTo(userId);
         assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getProviderUserId()).isEqualTo(providerUserId);
         assertThat(response.isLocked()).isFalse();
     }
 }

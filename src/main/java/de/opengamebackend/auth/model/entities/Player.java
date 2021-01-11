@@ -8,14 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
-@IdClass(PlayerId.class)
 public class Player {
     @Id
-    private String userId;
+    private String id;
 
-    @Id
     private String provider;
-
+    private String providerUserId;
     private boolean locked;
 
     @ManyToMany
@@ -25,16 +23,24 @@ public class Player {
         this.roles = new ArrayList<>();
     }
 
-    public String getUserId() {
-        return userId;
+    public String getId() {
+        return id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getProvider() {
         return provider;
+    }
+
+    public String getProviderUserId() {
+        return providerUserId;
+    }
+
+    public void setProviderUserId(String providerUserId) {
+        this.providerUserId = providerUserId;
     }
 
     public void setProvider(String provider) {

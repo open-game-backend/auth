@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -43,7 +44,7 @@ public class AuthService {
 
         for (Player admin : admins) {
             GetAdminsResponseAdmin responseAdmin =
-                    new GetAdminsResponseAdmin(admin.getUserId(), admin.getProvider(), admin.isLocked());
+                    new GetAdminsResponseAdmin(admin.getProvider(), admin.getProviderUserId(), admin.isLocked());
             response.getAdmins().add(responseAdmin);
         }
 
@@ -78,12 +79,13 @@ public class AuthService {
         // Look up player.
         boolean firstTimeSetup = false;
 
-        Player player = playerRepository.findByUserIdAndProvider(userId, request.getProvider()).orElse(null);
+        Player player = playerRepository.findByProviderAndProviderUserId(request.getProvider(), userId).orElse(null);
 
         if (player == null) {
             player = new Player();
+            player.setId(UUID.randomUUID().toString());
             player.setRoles(Collections.singletonList(role));
-            player.setUserId(userId);
+            player.setProviderUserId(userId);
             player.setProvider(request.getProvider());
 
             // Check if we're running the application for the very first time and need a first admin user.
@@ -92,7 +94,8 @@ public class AuthService {
 
                 if (admins == null || admins.isEmpty()) {
                     // Create admin user and allow login.
-                    logger.info("First time setup - admin created: {}", player.getUserId());
+                    logger.info("First time setup - admin created: {} ({} {})",
+                            player.getId(), player.getProvider(), player.getProviderUserId());
 
                     firstTimeSetup = true;
                 } else {
@@ -111,37 +114,38 @@ public class AuthService {
             roles.add(r.getName());
         }
 
-        logger.info("Login successful for player {} as {} with provider {}{}.", player.getUserId(), request.getRole(),
-                request.getProvider(), player.isLocked() ? " (locked)" : "");
+        logger.info("Login successful for player {} ({}) as {} with provider {}{}.", player.getProviderUserId(),
+                player.getId(), request.getRole(), request.getProvider(), player.isLocked() ? " (locked)" : "");
 
-        LoginResponse response = new LoginResponse(player.getUserId(), roles);
+        LoginResponse response = new LoginResponse(player.getId(), roles);
         response.setProvider(request.getProvider());
+        response.setProviderUserId(userId);
         response.setLocked(player.isLocked());
         response.setFirstTimeSetup(firstTimeSetup);
         return response;
     }
 
     public LockPlayerResponse lockPlayer(LockPlayerRequest request) throws ApiException {
-        setPlayerLocked(request.getUserId(), request.getProvider(), true);
-        return new LockPlayerResponse(request.getUserId(), request.getProvider(), true);
+        setPlayerLocked(request.getProvider(), request.getProviderUserId(), true);
+        return new LockPlayerResponse(request.getProvider(), request.getProviderUserId(), true);
     }
 
     public UnlockPlayerResponse unlockPlayer(UnlockPlayerRequest request) throws ApiException {
-        setPlayerLocked(request.getUserId(), request.getProvider(), false);
-        return new UnlockPlayerResponse(request.getUserId(), request.getProvider(), false);
+        setPlayerLocked(request.getProvider(), request.getProviderUserId(), false);
+        return new UnlockPlayerResponse(request.getProvider(), request.getProviderUserId(), false);
     }
 
-    private void setPlayerLocked(String userId, String provider, boolean locked) throws ApiException {
-        Player player = playerRepository.findByUserIdAndProvider(userId, provider).orElse(null);
+    private void setPlayerLocked(String provider, String providerUserId, boolean locked) throws ApiException {
+        Player player = playerRepository.findByProviderAndProviderUserId(provider, providerUserId).orElse(null);
 
         if (player == null) {
-            logger.error("Failed to change player lock - player not found: {} ({})", userId, provider);
+            logger.error("Failed to change player lock - player not found: {} ({})", providerUserId, provider);
             throw new ApiException(ApiErrors.PLAYER_NOT_FOUND_CODE, ApiErrors.PLAYER_NOT_FOUND_MESSAGE);
         }
 
         player.setLocked(locked);
         playerRepository.save(player);
 
-        logger.info("Player lock changed - {} ({}) - locked: {}", userId, provider, locked);
+        logger.info("Player lock changed - {} ({}) - locked: {}", providerUserId, provider, locked);
     }
 }
