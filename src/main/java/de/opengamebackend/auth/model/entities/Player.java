@@ -1,13 +1,11 @@
 package de.opengamebackend.auth.model.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
+@Table(name = "auth_player")
 public class Player {
     @Id
     private String id;
