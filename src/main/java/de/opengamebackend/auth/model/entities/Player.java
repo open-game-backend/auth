@@ -10,8 +10,12 @@ public class Player {
     @Id
     private String id;
 
+    @Column(nullable = false)
     private String provider;
+
+    @Column(nullable = false)
     private String providerUserId;
+
     private boolean locked;
 
     @ManyToMany
