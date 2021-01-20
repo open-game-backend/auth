@@ -7,7 +7,7 @@ CREATE TABLE auth_player (
     PRIMARY KEY (id)
 );
 
-CREATE INDEX ix_player_provider_provider_user_id ON auth_player (provider, provider_user_id);
+CREATE INDEX ix_auth_player_provider_provider_user_id ON auth_player (provider, provider_user_id);
 
 CREATE TABLE auth_player_roles (
     players_id VARCHAR(100) NOT NULL,
