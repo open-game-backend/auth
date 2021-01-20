@@ -48,7 +48,7 @@ public class AuthServiceTests {
     public void givenAdmins_whenGetAdmins_thenReturnAdmins() {
         // GIVEN
         Role role = mock(Role.class);
-        when(roleRepository.findByName(Role.ADMIN)).thenReturn(role);
+        when(roleRepository.findById(Role.ADMIN)).thenReturn(Optional.of(role));
 
         String admin1Id = "admin1";
         String admin2Id = "admin2";
@@ -124,7 +124,7 @@ public class AuthServiceTests {
 
         Role role = mock(Role.class);
         when(role.getName()).thenReturn(roleName);
-        when(roleRepository.findByName(roleName)).thenReturn(role);
+        when(roleRepository.findById(roleName)).thenReturn(Optional.of(role));
 
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
@@ -148,7 +148,7 @@ public class AuthServiceTests {
         String roleName = "testRole";
 
         Role role = mock(Role.class);
-        when(roleRepository.findByName(roleName)).thenReturn(role);
+        when(roleRepository.findById(roleName)).thenReturn(Optional.of(role));
 
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
@@ -173,7 +173,7 @@ public class AuthServiceTests {
         // GIVEN
         Role role = mock(Role.class);
         when(role.getName()).thenReturn(Role.ADMIN);
-        when(roleRepository.findByName(Role.ADMIN)).thenReturn(role);
+        when(roleRepository.findById(Role.ADMIN)).thenReturn(Optional.of(role));
 
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
@@ -192,7 +192,7 @@ public class AuthServiceTests {
         // GIVEN
         Role role = mock(Role.class);
         when(role.getName()).thenReturn(Role.ADMIN);
-        when(roleRepository.findByName(Role.ADMIN)).thenReturn(role);
+        when(roleRepository.findById(Role.ADMIN)).thenReturn(Optional.of(role));
 
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);

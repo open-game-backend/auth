@@ -39,7 +39,7 @@ public class AuthService {
     public GetAdminsResponse getAdmins() {
         GetAdminsResponse response = new GetAdminsResponse();
 
-        Role adminRole = roleRepository.findByName(Role.ADMIN);
+        Role adminRole = roleRepository.findById(Role.ADMIN).orElse(null);
         List<Player> admins = playerRepository.findByRoles(adminRole);
 
         for (Player admin : admins) {
@@ -69,7 +69,7 @@ public class AuthService {
         }
 
         // Look up role.
-        Role role = roleRepository.findByName(request.getRole());
+        Role role = roleRepository.findById(request.getRole()).orElse(null);
 
         if (role == null) {
             logger.error("Login failed - unknown role: {}", request.getRole());

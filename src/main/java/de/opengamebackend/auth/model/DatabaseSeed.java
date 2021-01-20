@@ -22,7 +22,7 @@ public class DatabaseSeed {
 
     @Transactional
     private Role getOrCreateRole(String name) {
-        Role role = roleRepository.findByName(name);
+        Role role = roleRepository.findById(name).orElse(null);
 
         if (role == null) {
             role = new Role(name);
