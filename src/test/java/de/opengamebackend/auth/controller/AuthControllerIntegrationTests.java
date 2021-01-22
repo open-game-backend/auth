@@ -5,10 +5,7 @@ import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
-import de.opengamebackend.auth.model.responses.GetAdminsResponse;
-import de.opengamebackend.auth.model.responses.LockPlayerResponse;
-import de.opengamebackend.auth.model.responses.LoginResponse;
-import de.opengamebackend.auth.model.responses.UnlockPlayerResponse;
+import de.opengamebackend.auth.model.responses.*;
 import de.opengamebackend.test.HttpRequestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +33,11 @@ public class AuthControllerIntegrationTests {
         this.entityManager = entityManager;
 
         this.httpRequestUtils = new HttpRequestUtils();
+    }
+
+    @Test
+    public void whenGetPlayers_thenOk() throws Exception {
+        httpRequestUtils.assertGetOk(mvc, "/admin/players", GetPlayersResponse.class);
     }
 
     @Test

@@ -8,10 +8,7 @@ import de.opengamebackend.auth.model.repositories.RoleRepository;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
-import de.opengamebackend.auth.model.responses.GetAdminsResponse;
-import de.opengamebackend.auth.model.responses.LockPlayerResponse;
-import de.opengamebackend.auth.model.responses.LoginResponse;
-import de.opengamebackend.auth.model.responses.UnlockPlayerResponse;
+import de.opengamebackend.auth.model.responses.*;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import org.assertj.core.util.Lists;
@@ -45,6 +42,46 @@ public class AuthServiceTests {
     }
 
     @Test
+    public void givenPlayers_whenGetPlayers_thenReturnPlayers() {
+        // GIVEN
+        Role role = mock(Role.class);
+        when(roleRepository.findById(Role.USER)).thenReturn(Optional.of(role));
+
+        String player1Id = "player1";
+        String player1ProviderUserId = "providerPlayer1";
+        String player2Id = "player2";
+        String player2ProviderUserId = "providerPlayer2";
+
+        Player player1 = mock(Player.class);
+        when(player1.getId()).thenReturn(player1Id);
+        when(player1.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(player1.getProviderUserId()).thenReturn(player1ProviderUserId);
+        when(player1.isLocked()).thenReturn(false);
+
+        Player player2 = mock(Player.class);
+        when(player2.getId()).thenReturn(player2Id);
+        when(player2.getProvider()).thenReturn(TEST_PROVIDER_ID);
+        when(player2.getProviderUserId()).thenReturn(player2ProviderUserId);
+        when(player2.isLocked()).thenReturn(true);
+
+        when(playerRepository.findByRoles(role)).thenReturn(Lists.list(player1, player2));
+
+        // WHEN
+        GetPlayersResponse response = authService.getPlayers();
+
+        // THEN
+        assertThat(response).isNotNull();
+        assertThat(response.getPlayers()).isNotNull();
+        assertThat(response.getPlayers()).hasSize(2);
+        assertThat(response.getPlayers().get(0).getPlayerId()).isEqualTo(player1Id);
+        assertThat(response.getPlayers().get(0).getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getPlayers().get(0).getProviderUserId()).isEqualTo(player1ProviderUserId);
+        assertThat(response.getPlayers().get(1).getPlayerId()).isEqualTo(player2Id);
+        assertThat(response.getPlayers().get(1).getProvider()).isEqualTo(TEST_PROVIDER_ID);
+        assertThat(response.getPlayers().get(1).getProviderUserId()).isEqualTo(player2ProviderUserId);
+    }
+
+    @Test
     public void givenAdmins_whenGetAdmins_thenReturnAdmins() {
         // GIVEN
         Role role = mock(Role.class);
@@ -74,7 +111,6 @@ public class AuthServiceTests {
         assertThat(response.getAdmins()).hasSize(2);
         assertThat(response.getAdmins().get(0).getProvider()).isEqualTo(TEST_PROVIDER_ID);
         assertThat(response.getAdmins().get(0).getProviderUserId()).isEqualTo(admin1Id);
-
         assertThat(response.getAdmins().get(0).isLocked()).isEqualTo(false);
         assertThat(response.getAdmins().get(1).getProvider()).isEqualTo(TEST_PROVIDER_ID);
         assertThat(response.getAdmins().get(1).getProviderUserId()).isEqualTo(admin2Id);

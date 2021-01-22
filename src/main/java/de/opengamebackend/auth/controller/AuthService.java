@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -36,19 +37,22 @@ public class AuthService {
         this.providers = providers;
     }
 
-    public GetAdminsResponse getAdmins() {
-        GetAdminsResponse response = new GetAdminsResponse();
+    public GetPlayersResponse getPlayers() {
+        Role playerRole = roleRepository.findById(Role.USER).orElse(null);
+        List<Player> players = playerRepository.findByRoles(playerRole);
 
+        return new GetPlayersResponse(players.stream()
+                .map(p -> new GetPlayersResponsePlayer(p.getId(), p.getProvider(), p.getProviderUserId()))
+                .collect(Collectors.toList()));
+    }
+
+    public GetAdminsResponse getAdmins() {
         Role adminRole = roleRepository.findById(Role.ADMIN).orElse(null);
         List<Player> admins = playerRepository.findByRoles(adminRole);
 
-        for (Player admin : admins) {
-            GetAdminsResponseAdmin responseAdmin =
-                    new GetAdminsResponseAdmin(admin.getProvider(), admin.getProviderUserId(), admin.isLocked());
-            response.getAdmins().add(responseAdmin);
-        }
-
-        return response;
+        return new GetAdminsResponse(admins.stream()
+                .map(a -> new GetAdminsResponseAdmin(a.getProvider(), a.getProviderUserId(), a.isLocked()))
+                .collect(Collectors.toList()));
     }
 
     public LoginResponse login(LoginRequest request) throws ApiException {

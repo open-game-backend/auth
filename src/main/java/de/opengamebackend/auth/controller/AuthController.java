@@ -3,10 +3,7 @@ package de.opengamebackend.auth.controller;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
-import de.opengamebackend.auth.model.responses.GetAdminsResponse;
-import de.opengamebackend.auth.model.responses.LockPlayerResponse;
-import de.opengamebackend.auth.model.responses.LoginResponse;
-import de.opengamebackend.auth.model.responses.UnlockPlayerResponse;
+import de.opengamebackend.auth.model.responses.*;
 import de.opengamebackend.net.ApiErrors;
 import de.opengamebackend.net.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +26,21 @@ public class AuthController {
     @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @GetMapping("/admin/players")
+    @Operation(summary = "Gets all players registered for this application, including locked ones.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "All players registered for this application, including locked ones.",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetAdminsResponse.class)) })
+    })
+    public ResponseEntity<GetPlayersResponse> getPlayers() throws ApiException {
+        GetPlayersResponse response = authService.getPlayers();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/admin/admins")
