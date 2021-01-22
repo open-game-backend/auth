@@ -31,7 +31,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/admins")
+    @GetMapping("/admin/admins")
     @Operation(summary = "Gets all admins registered for this application, including locked ones.")
     @ApiResponses(value = {
             @ApiResponse(
@@ -46,7 +46,7 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/lockPlayer")
+    @PostMapping("/admin/lockPlayer")
     @Operation(summary = "Locks the specified player, preventing them from logging in.")
     @ApiResponses(value = {
             @ApiResponse(
@@ -65,7 +65,7 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/unlockPlayer")
+    @PostMapping("/admin/unlockPlayer")
     @Operation(summary = "Unlocks the specified player, allowing them to log in.")
     @ApiResponses(value = {
             @ApiResponse(

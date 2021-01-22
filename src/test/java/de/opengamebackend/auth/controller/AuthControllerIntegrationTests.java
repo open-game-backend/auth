@@ -40,7 +40,7 @@ public class AuthControllerIntegrationTests {
 
     @Test
     public void whenGetAdmins_thenOk() throws Exception {
-        httpRequestUtils.assertGetOk(mvc, "/admins", GetAdminsResponse.class);
+        httpRequestUtils.assertGetOk(mvc, "/admin/admins", GetAdminsResponse.class);
     }
 
     @Test
@@ -65,7 +65,7 @@ public class AuthControllerIntegrationTests {
         request.setProvider(player.getProvider());
         request.setProviderUserId(player.getProviderUserId());
 
-        httpRequestUtils.assertPostOk(mvc, "/lockPlayer", request, LockPlayerResponse.class);
+        httpRequestUtils.assertPostOk(mvc, "/admin/lockPlayer", request, LockPlayerResponse.class);
     }
 
     @Test
@@ -80,6 +80,6 @@ public class AuthControllerIntegrationTests {
         request.setProvider(player.getProvider());
         request.setProviderUserId(player.getProviderUserId());
 
-        httpRequestUtils.assertPostOk(mvc, "/unlockPlayer", request, UnlockPlayerResponse.class);
+        httpRequestUtils.assertPostOk(mvc, "/admin/unlockPlayer", request, UnlockPlayerResponse.class);
     }
 }
