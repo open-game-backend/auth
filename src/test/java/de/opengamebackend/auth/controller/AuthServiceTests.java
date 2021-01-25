@@ -15,6 +15,7 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,10 +65,13 @@ public class AuthServiceTests {
         when(player2.getProviderUserId()).thenReturn(player2ProviderUserId);
         when(player2.isLocked()).thenReturn(true);
 
-        when(playerRepository.findByRoles(role)).thenReturn(Lists.list(player1, player2));
+        List<Player> players = Lists.list(player1, player2);
+
+        when(playerRepository.findByRoles(eq(role), any())).thenReturn(players);
+        when(playerRepository.countByRoles(role)).thenReturn(players.size());
 
         // WHEN
-        GetPlayersResponse response = authService.getPlayers();
+        GetPlayersResponse response = authService.getPlayers(0);
 
         // THEN
         assertThat(response).isNotNull();
@@ -79,6 +83,8 @@ public class AuthServiceTests {
         assertThat(response.getPlayers().get(1).getPlayerId()).isEqualTo(player2Id);
         assertThat(response.getPlayers().get(1).getProvider()).isEqualTo(TEST_PROVIDER_ID);
         assertThat(response.getPlayers().get(1).getProviderUserId()).isEqualTo(player2ProviderUserId);
+        assertThat(response.getTotalPlayers()).isEqualTo(2);
+        assertThat(response.getTotalPages()).isEqualTo(1);
     }
 
     @Test

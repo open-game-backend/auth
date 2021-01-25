@@ -14,6 +14,9 @@ import de.opengamebackend.net.ApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
+    private static final int PAGE_SIZE = 100;
+
     private Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private RoleRepository roleRepository;
@@ -37,13 +42,16 @@ public class AuthService {
         this.providers = providers;
     }
 
-    public GetPlayersResponse getPlayers() {
+    public GetPlayersResponse getPlayers(int page) {
         Role playerRole = roleRepository.findById(Role.USER).orElse(null);
-        List<Player> players = playerRepository.findByRoles(playerRole);
-
-        return new GetPlayersResponse(players.stream()
+        Pageable sortedPageable = PageRequest.of(page, PAGE_SIZE, Sort.by("id"));
+        List<Player> players = playerRepository.findByRoles(playerRole, sortedPageable);
+        List<GetPlayersResponsePlayer> responsePlayers = players.stream()
                 .map(p -> new GetPlayersResponsePlayer(p.getId(), p.getProvider(), p.getProviderUserId()))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        int totalPlayers = playerRepository.countByRoles(playerRole);
+        int totalPages = totalPlayers > PAGE_SIZE ? (totalPlayers / PAGE_SIZE) + 1 : 1;
+        return new GetPlayersResponse(responsePlayers, totalPlayers, totalPages);
     }
 
     public GetAdminsResponse getAdmins() {

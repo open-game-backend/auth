@@ -14,10 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AuthController {
@@ -38,8 +35,8 @@ public class AuthController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = GetAdminsResponse.class)) })
     })
-    public ResponseEntity<GetPlayersResponse> getPlayers() throws ApiException {
-        GetPlayersResponse response = authService.getPlayers();
+    public ResponseEntity<GetPlayersResponse> getPlayers(@RequestParam(required = false, defaultValue = "0") int page) {
+        GetPlayersResponse response = authService.getPlayers(page);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -53,7 +50,7 @@ public class AuthController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = GetAdminsResponse.class)) })
     })
-    public ResponseEntity<GetAdminsResponse> getAdmins() throws ApiException {
+    public ResponseEntity<GetAdminsResponse> getAdmins() {
         GetAdminsResponse response = authService.getAdmins();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
