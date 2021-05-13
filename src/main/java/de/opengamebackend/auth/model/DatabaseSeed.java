@@ -17,6 +17,7 @@ public class DatabaseSeed {
     public void postConstruct() {
         // Seed roles.
         getOrCreateRole(AuthRole.ROLE_ADMIN);
+        getOrCreateRole(AuthRole.ROLE_SERVER);
         getOrCreateRole(AuthRole.ROLE_USER);
     }
 
