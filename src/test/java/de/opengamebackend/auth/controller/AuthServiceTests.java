@@ -3,8 +3,10 @@ package de.opengamebackend.auth.controller;
 import de.opengamebackend.auth.controller.providers.AuthProvider;
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
+import de.opengamebackend.auth.model.entities.SecretKey;
 import de.opengamebackend.auth.model.repositories.PlayerRepository;
 import de.opengamebackend.auth.model.repositories.RoleRepository;
+import de.opengamebackend.auth.model.repositories.SecretKeyRepository;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
@@ -14,6 +16,7 @@ import de.opengamebackend.net.ApiException;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,7 @@ public class AuthServiceTests {
 
     private RoleRepository roleRepository;
     private PlayerRepository playerRepository;
+    private SecretKeyRepository secretKeyRepository;
     private AuthProvider authProvider;
 
     private AuthService authService;
@@ -35,11 +39,12 @@ public class AuthServiceTests {
     public void setUp() {
         roleRepository = mock(RoleRepository.class);
         playerRepository = mock(PlayerRepository.class);
+        secretKeyRepository = mock(SecretKeyRepository.class);
 
         authProvider = mock(AuthProvider.class);
         when(authProvider.getId()).thenReturn(TEST_PROVIDER_ID);
 
-        authService = new AuthService(roleRepository, playerRepository, Lists.list(authProvider));
+        authService = new AuthService(roleRepository, playerRepository, secretKeyRepository, Lists.list(authProvider));
     }
 
     @Test
@@ -319,5 +324,77 @@ public class AuthServiceTests {
         assertThat(response.getProvider()).isEqualTo(TEST_PROVIDER_ID);
         assertThat(response.getProviderUserId()).isEqualTo(providerUserId);
         assertThat(response.isLocked()).isFalse();
+    }
+
+    @Test
+    public void givenSecretKeys_whenGetSecretKeys_thenReturnKeys() {
+        // GIVEN
+        SecretKey key1 = mock(SecretKey.class);
+        when(key1.getKey()).thenReturn("key1");
+
+        SecretKey key2 = mock(SecretKey.class);
+        when(key2.getKey()).thenReturn("key2");
+
+        when(secretKeyRepository.findAll()).thenReturn(Lists.list(key1, key2));
+
+        // WHEN
+        GetSecretKeysResponse response = authService.getSecretKeys();
+
+        // THEN
+        assertThat(response).isNotNull();
+        assertThat(response.getKeys()).isNotNull();
+        assertThat(response.getKeys()).hasSize(2);
+        assertThat(response.getKeys().get(0)).isEqualTo(key1.getKey());
+        assertThat(response.getKeys().get(1)).isEqualTo(key2.getKey());
+    }
+
+    @Test
+    public void whenGenerateSecretKey_thenSavesNewKey() {
+        // WHEN
+        authService.generateSecretKey();
+
+        // THEN
+        ArgumentCaptor<SecretKey> argumentCaptor = ArgumentCaptor.forClass(SecretKey.class);
+        verify(secretKeyRepository).save(argumentCaptor.capture());
+
+        SecretKey savedKey = argumentCaptor.getValue();
+
+        assertThat(savedKey).isNotNull();
+        assertThat(savedKey.getKey()).isNotNull();
+        assertThat(savedKey.getKey()).isNotEmpty();
+    }
+
+    @Test
+    public void whenGenerateSecretKey_thenReturnsNewKey() {
+        // WHEN
+        GenerateSecretKeyResponse response = authService.generateSecretKey();
+
+        // THEN
+        assertThat(response).isNotNull();
+        assertThat(response.getKey()).isNotNull();
+        assertThat(response.getKey()).isNotEmpty();
+    }
+
+    @Test
+    public void givenInvalidKey_whenRemoveSecretKey_thenThrowException() {
+        // WHEN & THEN
+        assertThatExceptionOfType(ApiException.class)
+                .isThrownBy(() -> authService.removeSecretKey(null))
+                .withMessage(ApiErrors.INVALID_SECRET_KEY_MESSAGE);
+    }
+
+    @Test
+    public void givenValidKey_whenRemoveSecretKey_thenDeletesKey() throws ApiException {
+        // GIVEN
+        String key = "testKey";
+
+        SecretKey secretKey = mock(SecretKey.class);
+        when(secretKeyRepository.findById(key)).thenReturn(Optional.of(secretKey));
+
+        // WHEN
+        authService.removeSecretKey(key);
+
+        // THEN
+        verify(secretKeyRepository).delete(secretKey);
     }
 }

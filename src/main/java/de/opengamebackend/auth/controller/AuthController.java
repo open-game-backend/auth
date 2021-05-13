@@ -114,4 +114,51 @@ public class AuthController {
         LoginResponse response = authService.login(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/admin/secretkeys")
+    @Operation(summary = "Gets all valid secret keys of this application.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "All valid secret keys that have been generated for this application.",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GetSecretKeysResponse.class)) })
+    })
+    public ResponseEntity<GetSecretKeysResponse> getSecretKeys() {
+        GetSecretKeysResponse response = authService.getSecretKeys();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/secretkeys")
+    @Operation(summary = "Generated a new secret key for authenticating with this application.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Key generated.",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GenerateSecretKeyResponse.class)) })
+    })
+    public ResponseEntity<GenerateSecretKeyResponse> generateSecretKey() {
+        GenerateSecretKeyResponse response = authService.generateSecretKey();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/secretkeys/{key}")
+    @Operation(summary = "Deletes an existing secret key.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Key deleted."),
+            @ApiResponse(
+                    responseCode = "400",
+                    description =
+                            "Error " + ApiErrors.INVALID_SECRET_KEY_MESSAGE + ": " + ApiErrors.INVALID_SECRET_KEY_MESSAGE,
+                    content = { @Content})
+    })
+    public ResponseEntity<Void> deleteSecretKey(@PathVariable String key) throws ApiException {
+        authService.removeSecretKey(key);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

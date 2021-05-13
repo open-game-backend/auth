@@ -3,8 +3,10 @@ package de.opengamebackend.auth.controller;
 import de.opengamebackend.auth.controller.providers.AuthProvider;
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
+import de.opengamebackend.auth.model.entities.SecretKey;
 import de.opengamebackend.auth.model.repositories.PlayerRepository;
 import de.opengamebackend.auth.model.repositories.RoleRepository;
+import de.opengamebackend.auth.model.repositories.SecretKeyRepository;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
@@ -20,10 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,16 +30,21 @@ import java.util.stream.Collectors;
 public class AuthService {
     private static final int PAGE_SIZE = 100;
 
-    private Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    private RoleRepository roleRepository;
-    private PlayerRepository playerRepository;
-    private List<AuthProvider> providers;
+    private final RoleRepository roleRepository;
+    private final PlayerRepository playerRepository;
+    private final SecretKeyRepository secretKeyRepository;
+
+    private final List<AuthProvider> providers;
 
     @Autowired
-    public AuthService(RoleRepository roleRepository, PlayerRepository playerRepository, List<AuthProvider> providers) {
+    public AuthService(RoleRepository roleRepository, PlayerRepository playerRepository,
+                       SecretKeyRepository secretKeyRepository, List<AuthProvider> providers) {
         this.roleRepository = roleRepository;
         this.playerRepository = playerRepository;
+        this.secretKeyRepository = secretKeyRepository;
+
         this.providers = providers;
     }
 
@@ -161,5 +165,36 @@ public class AuthService {
         playerRepository.save(player);
 
         logger.info("Player lock changed - {} ({}) - locked: {}", providerUserId, provider, locked);
+    }
+
+    public GetSecretKeysResponse getSecretKeys() {
+        List<String> keys = new ArrayList<>();
+
+        for (SecretKey key : secretKeyRepository.findAll()) {
+            keys.add(key.getKey());
+        }
+
+        return new GetSecretKeysResponse(keys);
+    }
+
+    public GenerateSecretKeyResponse generateSecretKey() {
+        String key = UUID.randomUUID().toString()
+                .concat(UUID.randomUUID().toString())
+                .concat(UUID.randomUUID().toString());
+
+        SecretKey secretKey = new SecretKey(key);
+        secretKeyRepository.save(secretKey);
+
+        return new GenerateSecretKeyResponse(key);
+    }
+
+    public void removeSecretKey(String key) throws ApiException {
+        Optional<SecretKey> secretKey = secretKeyRepository.findById(key);
+
+        if (!secretKey.isPresent()) {
+            throw new ApiException(ApiErrors.INVALID_SECRET_KEY_CODE, ApiErrors.INVALID_SECRET_KEY_MESSAGE);
+        }
+
+        secretKeyRepository.delete(secretKey.get());
     }
 }

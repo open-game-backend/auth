@@ -2,6 +2,7 @@ package de.opengamebackend.auth.controller;
 
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
+import de.opengamebackend.auth.model.entities.SecretKey;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
 import de.opengamebackend.auth.model.requests.UnlockPlayerRequest;
@@ -83,5 +84,23 @@ public class AuthControllerIntegrationTests {
         request.setProviderUserId(player.getProviderUserId());
 
         httpRequestUtils.assertPostOk(mvc, "/admin/unlockPlayer", request, UnlockPlayerResponse.class);
+    }
+
+    @Test
+    public void whenGetSecretKeys_thenOk() throws Exception {
+        httpRequestUtils.assertGetOk(mvc, "/admin/secretkeys", GetSecretKeysResponse.class);
+    }
+
+    @Test
+    public void whenGenerateSecretKey_thenOk() throws Exception {
+        httpRequestUtils.assertPostOk(mvc, "/admin/secretkeys", null, GenerateSecretKeyResponse.class);
+    }
+
+    @Test
+    public void givenSecretKey_whenDeleteSecretKey_thenOk() throws Exception {
+        SecretKey secretKey = new SecretKey("testKey");
+        entityManager.persistAndFlush(secretKey);
+
+        httpRequestUtils.assertDeleteOk(mvc, "/admin/secretkeys/" + secretKey.getKey());
     }
 }
