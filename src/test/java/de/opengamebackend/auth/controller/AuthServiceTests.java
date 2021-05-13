@@ -1,6 +1,7 @@
 package de.opengamebackend.auth.controller;
 
 import de.opengamebackend.auth.controller.providers.AuthProvider;
+import de.opengamebackend.auth.model.AuthRole;
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.entities.SecretKey;
@@ -51,7 +52,7 @@ public class AuthServiceTests {
     public void givenPlayers_whenGetPlayers_thenReturnPlayers() {
         // GIVEN
         Role role = mock(Role.class);
-        when(roleRepository.findById(Role.USER)).thenReturn(Optional.of(role));
+        when(roleRepository.findById(AuthRole.ROLE_USER.name())).thenReturn(Optional.of(role));
 
         String player1Id = "player1";
         String player1ProviderUserId = "providerPlayer1";
@@ -96,7 +97,7 @@ public class AuthServiceTests {
     public void givenAdmins_whenGetAdmins_thenReturnAdmins() {
         // GIVEN
         Role role = mock(Role.class);
-        when(roleRepository.findById(Role.ADMIN)).thenReturn(Optional.of(role));
+        when(roleRepository.findById(AuthRole.ROLE_ADMIN.name())).thenReturn(Optional.of(role));
 
         String admin1Id = "admin1";
         String admin2Id = "admin2";
@@ -219,12 +220,12 @@ public class AuthServiceTests {
     public void givenFirstAdmin_whenLogin_thenReturnFirstTimeSetup() throws ApiException {
         // GIVEN
         Role role = mock(Role.class);
-        when(role.getName()).thenReturn(Role.ADMIN);
-        when(roleRepository.findById(Role.ADMIN)).thenReturn(Optional.of(role));
+        when(role.getName()).thenReturn(AuthRole.ROLE_ADMIN.name());
+        when(roleRepository.findById(AuthRole.ROLE_ADMIN.name())).thenReturn(Optional.of(role));
 
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
-        when(request.getRole()).thenReturn(Role.ADMIN);
+        when(request.getRole()).thenReturn(AuthRole.ROLE_ADMIN.name());
         when(authProvider.authenticate(any(), any())).thenReturn("testPlayerId");
 
         // WHEN
@@ -238,12 +239,12 @@ public class AuthServiceTests {
     public void givenSecondAdmin_whenLogin_thenLockPlayer() throws ApiException {
         // GIVEN
         Role role = mock(Role.class);
-        when(role.getName()).thenReturn(Role.ADMIN);
-        when(roleRepository.findById(Role.ADMIN)).thenReturn(Optional.of(role));
+        when(role.getName()).thenReturn(AuthRole.ROLE_ADMIN.name());
+        when(roleRepository.findById(AuthRole.ROLE_ADMIN.name())).thenReturn(Optional.of(role));
 
         LoginRequest request = mock(LoginRequest.class);
         when(request.getProvider()).thenReturn(TEST_PROVIDER_ID);
-        when(request.getRole()).thenReturn(Role.ADMIN);
+        when(request.getRole()).thenReturn(AuthRole.ROLE_ADMIN.name());
         when(authProvider.authenticate(any(), any())).thenReturn("testPlayerId");
 
         Player existingAdmin = mock(Player.class);

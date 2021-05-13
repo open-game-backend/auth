@@ -1,6 +1,7 @@
 package de.opengamebackend.auth.controller;
 
 import de.opengamebackend.auth.controller.providers.AuthProvider;
+import de.opengamebackend.auth.model.AuthRole;
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.entities.SecretKey;
@@ -49,7 +50,7 @@ public class AuthService {
     }
 
     public GetPlayersResponse getPlayers(int page) {
-        Role playerRole = roleRepository.findById(Role.USER).orElse(null);
+        Role playerRole = roleRepository.findById(AuthRole.ROLE_USER.name()).orElse(null);
         Pageable sortedPageable = PageRequest.of(page, PAGE_SIZE, Sort.by("id"));
         List<Player> players = playerRepository.findByRoles(playerRole, sortedPageable);
         List<GetPlayersResponsePlayer> responsePlayers = players.stream()
@@ -61,7 +62,7 @@ public class AuthService {
     }
 
     public GetAdminsResponse getAdmins() {
-        Role adminRole = roleRepository.findById(Role.ADMIN).orElse(null);
+        Role adminRole = roleRepository.findById(AuthRole.ROLE_ADMIN.name()).orElse(null);
         List<Player> admins = playerRepository.findByRoles(adminRole);
 
         return new GetAdminsResponse(admins.stream()
@@ -107,7 +108,7 @@ public class AuthService {
             player.setProvider(request.getProvider());
 
             // Check if we're running the application for the very first time and need a first admin user.
-            if (Role.ADMIN.equals(request.getRole())) {
+            if (AuthRole.ROLE_ADMIN.name().equals(request.getRole())) {
                 List<Player> admins = playerRepository.findByRoles(role);
 
                 if (admins == null || admins.isEmpty()) {

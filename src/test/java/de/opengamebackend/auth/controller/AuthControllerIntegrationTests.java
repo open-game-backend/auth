@@ -1,5 +1,6 @@
 package de.opengamebackend.auth.controller;
 
+import de.opengamebackend.auth.model.AuthRole;
 import de.opengamebackend.auth.model.entities.Player;
 import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.entities.SecretKey;
@@ -51,7 +52,7 @@ public class AuthControllerIntegrationTests {
         LoginRequest request = new LoginRequest();
         request.setKey("testPlayerId");
         request.setProvider("");
-        request.setRole(Role.USER);
+        request.setRole(AuthRole.ROLE_USER.name());
 
         httpRequestUtils.assertPostOk(mvc, "/login", request, LoginResponse.class);
     }

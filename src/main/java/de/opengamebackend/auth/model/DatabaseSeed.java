@@ -16,16 +16,16 @@ public class DatabaseSeed {
     @PostConstruct
     public void postConstruct() {
         // Seed roles.
-        getOrCreateRole(Role.ADMIN);
-        getOrCreateRole(Role.USER);
+        getOrCreateRole(AuthRole.ROLE_ADMIN);
+        getOrCreateRole(AuthRole.ROLE_USER);
     }
 
     @Transactional
-    private Role getOrCreateRole(String name) {
-        Role role = roleRepository.findById(name).orElse(null);
+    private Role getOrCreateRole(AuthRole authRole) {
+        Role role = roleRepository.findById(authRole.name()).orElse(null);
 
         if (role == null) {
-            role = new Role(name);
+            role = new Role(authRole.name());
             roleRepository.save(role);
         }
 
