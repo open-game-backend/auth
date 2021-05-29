@@ -172,7 +172,7 @@ public class AuthService {
         List<String> keys = new ArrayList<>();
 
         for (SecretKey key : secretKeyRepository.findAll()) {
-            keys.add(key.getKey());
+            keys.add(key.getSecretKey());
         }
 
         return new GetSecretKeysResponse(keys);

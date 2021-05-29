@@ -331,10 +331,10 @@ public class AuthServiceTests {
     public void givenSecretKeys_whenGetSecretKeys_thenReturnKeys() {
         // GIVEN
         SecretKey key1 = mock(SecretKey.class);
-        when(key1.getKey()).thenReturn("key1");
+        when(key1.getSecretKey()).thenReturn("key1");
 
         SecretKey key2 = mock(SecretKey.class);
-        when(key2.getKey()).thenReturn("key2");
+        when(key2.getSecretKey()).thenReturn("key2");
 
         when(secretKeyRepository.findAll()).thenReturn(Lists.list(key1, key2));
 
@@ -345,8 +345,8 @@ public class AuthServiceTests {
         assertThat(response).isNotNull();
         assertThat(response.getKeys()).isNotNull();
         assertThat(response.getKeys()).hasSize(2);
-        assertThat(response.getKeys().get(0)).isEqualTo(key1.getKey());
-        assertThat(response.getKeys().get(1)).isEqualTo(key2.getKey());
+        assertThat(response.getKeys().get(0)).isEqualTo(key1.getSecretKey());
+        assertThat(response.getKeys().get(1)).isEqualTo(key2.getSecretKey());
     }
 
     @Test
@@ -361,8 +361,8 @@ public class AuthServiceTests {
         SecretKey savedKey = argumentCaptor.getValue();
 
         assertThat(savedKey).isNotNull();
-        assertThat(savedKey.getKey()).isNotNull();
-        assertThat(savedKey.getKey()).isNotEmpty();
+        assertThat(savedKey.getSecretKey()).isNotNull();
+        assertThat(savedKey.getSecretKey()).isNotEmpty();
     }
 
     @Test

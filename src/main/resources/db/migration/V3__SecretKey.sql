@@ -1,5 +1,5 @@
 CREATE TABLE auth_secretkey (
-    key VARCHAR(255) NOT NULL,
+    secret_key VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY (key)
+    PRIMARY KEY (secret_key)
 );

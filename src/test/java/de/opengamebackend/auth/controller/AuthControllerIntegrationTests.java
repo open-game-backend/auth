@@ -2,7 +2,6 @@ package de.opengamebackend.auth.controller;
 
 import de.opengamebackend.auth.model.AuthRole;
 import de.opengamebackend.auth.model.entities.Player;
-import de.opengamebackend.auth.model.entities.Role;
 import de.opengamebackend.auth.model.entities.SecretKey;
 import de.opengamebackend.auth.model.requests.LockPlayerRequest;
 import de.opengamebackend.auth.model.requests.LoginRequest;
@@ -102,6 +101,6 @@ public class AuthControllerIntegrationTests {
         SecretKey secretKey = new SecretKey("testKey");
         entityManager.persistAndFlush(secretKey);
 
-        httpRequestUtils.assertDeleteOk(mvc, "/admin/secretkeys/" + secretKey.getKey());
+        httpRequestUtils.assertDeleteOk(mvc, "/admin/secretkeys/" + secretKey.getSecretKey());
     }
 }

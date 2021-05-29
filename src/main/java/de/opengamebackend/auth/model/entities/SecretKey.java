@@ -8,20 +8,20 @@ import javax.persistence.Table;
 @Table(name = "auth_secretkey")
 public class SecretKey {
     @Id
-    private String key;
+    private String secretKey;
 
     public SecretKey() {
     }
 
-    public SecretKey(String key) {
-        this.key = key;
+    public SecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
-    public String getKey() {
-        return key;
+    public String getSecretKey() {
+        return secretKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 }
