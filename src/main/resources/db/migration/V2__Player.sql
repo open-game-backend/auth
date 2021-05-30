@@ -4,7 +4,8 @@ CREATE TABLE auth_player (
     provider_user_id VARCHAR(100) NOT NULL,
     locked BIT(1) NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT auth_player_unique UNIQUE (provider, provider_user_id)
 );
 
 CREATE INDEX ix_auth_player_provider_provider_user_id ON auth_player (provider, provider_user_id);
